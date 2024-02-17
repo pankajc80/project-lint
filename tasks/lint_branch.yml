@@ -1,0 +1,78 @@
+---
+- name: Git clone the repo and branch
+  ansible.builtin.git:
+    repo: "{{ url }}"
+    dest: "{{ repo_path }}/{{ item.name }}"
+    version: "{{ src_branch }}"
+  
+- name: Ansible lint for prod_linted branch
+  ansible.builtin.shell: |
+    cd {{ repo_path }}/{{ item.name }}
+    rm -f linted/report.txt linted/error.txt
+    for YML in $(find . -name "*.yml" ) ; do ansible-lint -q --nocolor -c ../../.ansible-lint $YML --exclude * --fix >> linted/report.txt 2>>linted/error.txt; done
+    git add .
+    git commit -m "Replace modules with FQCN , reformatting yaml and generate lint report"
+    git push {{ url }} prod_linted
+    git checkout -b prod_linted_noresult prod_linted
+    rm -rf linted/
+    git add .
+    git commit -m "Replace modules with FQCN , reformatting yaml and generate lint report"
+    git push {{ url }} prod_linted_noresult
+  ignore_errors: true
+  when: src_branch == "prod_linted"
+  
+
+- name: Ansible lint for prod_branch
+  ansible.builtin.shell: |
+    cd {{ repo_path }}/{{ item.name }}
+    git config user.email "mrchandna@gmail.com"
+    git config user.name "Pankaj"
+    git checkout -b prod_linted prod
+    mkdir linted
+    cp -p ../../README.mc linted/
+    for YML in $(find . -name "*.yml" ) ; do ansible-lint -q --nocolor -c ../../.ansible-lint $YML --exclude * --fix >> linted/report.txt 2>>linted/error.txt; done
+    git add .
+    git commit -m "Replace modules with FQCN , reformatting yaml and generate lint report"
+    git push {{ url }} prod_linted
+    git checkout -b prod_linted_noresult prod_linted
+    rm -rf linted/
+    git add .
+    git commit -m "Replace modules with FQCN , reformatting yaml and generate lint report"
+    git push {{ url }} prod_linted_noresult
+  #ignore_errors: true
+  when: src_branch == "prod"
+  
+# - name: Ansible lint for prod_branch
+#   ansible.builtin.shell: |
+#     cd {{ repo_path }}/{{ item.name }}
+#     git config user.email "mrchandna@gmail.com"
+#     git config user.name "Pankaj"
+#     git checkout -b prod_linted prod
+#     mkdir linted
+#     for YML in $(find . -name "*.yml" ) ; do if [[ "$YML" == *.yml ]]; then ansible-lint -q --nocolor -c ../../.ansible-lint $YML --exclude * --fix >> linted/report.txt 2>>linted/error.txt; fi; done
+#     git add .
+#     git commit -m "Replace modules with FQCN , reformatting yaml and generate lint report"
+#     git push {{ url }} prod_linted
+#     git checkout -b prod_linted_noresult prod_linted
+#     rm -rf linted/
+#     git add .
+#     git commit -m "Replace modules with FQCN , reformatting yaml and generate lint report"
+#     git push {{ url }} prod_linted_noresult
+#   #ignore_errors: true
+#   when: src_branch == "prod"
+
+# - name: Create Pull Request
+#   ansible.builtin.uri:
+#     url: https://api.github.com/repos/ansible-automate/{{ item.name }}/pulls
+#     headers:
+#       Accept: application/vnd.github+json
+#       Authorization: Bearer {{ githubtoken }}
+#       X-GitHub-Api-Version: 2022-11-28
+#     body_format: json
+#     body:
+#       title: Marge linted to prod
+#       head: prod_linted_noresult
+#       base: prod
+#     validate_certs: false
+#     method: POST
+#     status_code: 201

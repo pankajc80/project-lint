@@ -1,0 +1,51 @@
+---
+- name: Clear HTTPS url via regex
+  ansible.builtin.set_fact:
+    url: "{{ item.clone_url | regex_replace('^https://','')}}"
+
+- name: Add authentication in url
+  ansible.builtin.set_fact:
+    url: "https://{{ gituser | urlencode }}:{{ githubtoken | urlencode }}@{{ url }}"
+
+- name: Update branch URL
+  ansible.builtin.set_fact:
+    branches_url: "{{ item.branches_url | regex_replace('{/branch}$','') }}"
+
+- name: Get branch list for the repos
+  ansible.builtin.uri:
+    url: "{{ branches_url }}"
+    headers:
+      Accept: application/vnd.github+json
+      Authorization: Bearer {{ githubtoken }}
+      X-GitHub-Api-Version: 2022-11-28
+    validate_certs: false
+  register: branch_list
+
+# - name: Set Branch list
+#   ansible.builtin.set_fact:
+#     branchlist: "{{ branch_list.json | map(attribute='name') | list }}"
+
+- name: Display branch list
+  ansible.builtin.debug:
+    var: branch_list
+
+- name: Delete Linted Branch
+  ansible.builtin.include_tasks:
+    file: tasks/delete_branch.yml
+  loop: "{{ branch_list.json }}"
+  loop_control:
+    loop_var: item_branch
+  when: item_branch.name == 'prod_linted' and src_branch == 'prod'
+
+- name: Delete NoResult Branch
+  ansible.builtin.include_tasks:
+    file: tasks/delete_noresult_branch.yml
+  when: src_branch == 'prod_linted'
+
+- name: Loop through the branch to perform lint
+  ansible.builtin.include_tasks:
+    file: tasks/lint_branch.yml
+  loop: "{{ branch_list.json }}"
+  loop_control:
+    loop_var: item_branch
+  when: item_branch.name == 'prod'
