@@ -63,7 +63,7 @@
 
     - name: Set repo list variable
       ansible.builtin.set_fact:
-        repo_list: "{{ repo_list.split('\n') | default(omit) }}"
+        repo_list: "{{ repo_list.split('\n') }}"
 
     - name: Loop through repos to get the branches
       ansible.builtin.include_tasks:
