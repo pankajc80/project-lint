@@ -63,19 +63,19 @@
 
     - name: Set repo list variable
       ansible.builtin.set_fact:
-        repolist: "{{ repo_list.split('\n') | default(omit) }}"
+        repo_list: "{{ repo_list.split('\n') | default(omit) }}"
 
     - name: Loop through repos to get the branches
       ansible.builtin.include_tasks:
         file: tasks/branch.yml
       loop: "{{ output.json }}" 
-      when: repolist is undefined
+      when: repo_list is not defined
 
-    - name: Loop through repos to get the branches
+    - name: Loop through speficied repos to get the branches
       ansible.builtin.include_tasks:
         file: tasks/branch.yml
       loop: "{{ output.json }}" 
-      when: repolist is defined and item.name in repolist  
+      when: repo_list is defined and item.name in repo_list  
 
     # - name: Update branch URL
     #   ansible.builtin.set_fact:
