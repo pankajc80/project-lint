@@ -73,10 +73,10 @@
       loop: "{{ output.json }}" 
       # when: repolist is undefined
 
-    - name: Loop through repos to get the branches
-      ansible.builtin.include_tasks:
-        file: tasks/branch.yml
-      loop: "{{ output.json }}" 
+    # - name: Loop through repos to get the branches
+    #   ansible.builtin.include_tasks:
+    #     file: tasks/branch.yml
+    #   loop: "{{ output.json }}" 
       # when: repolist is defined and item.name in repolist  
 
     # - name: Update branch URL
