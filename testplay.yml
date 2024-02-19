@@ -1,0 +1,8 @@
+---
+- name: For testing purpose
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Include tasks
+      ansible.builtin.include_tasks:
+        file: tasks/lint_files.yml

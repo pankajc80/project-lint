@@ -1,0 +1,20 @@
+---
+- name: Find YML files for linting
+  ansible.builtin.find:
+    #path: "{{ repo_path }}/{{ item.name }}"
+    path: "/home/pankaj/automation/git-books/tasks"
+    recurse: true 
+  register: files
+
+- name: Compute the file list
+  ansible.builtin.set_fact:
+    file_list: "{{ files['files'] | map(attribute='path') | list }}"
+
+- name: Display list
+  debug:
+    var: file_list
+
+- name: Execute lint on discovered files
+  shell: ansible-lint -q --nocolor {{ item }} >> {{ item | regex_replace('.yml','') }}_report.txt 2>>{{ it  em }}_error.txt 
+  loop: "{{ file_list }}"
+  ignore_errors: true
