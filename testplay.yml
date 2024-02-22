@@ -3,6 +3,10 @@
   hosts: localhost
   gather_facts: false
   tasks:
-    - name: Include tasks
-      ansible.builtin.include_tasks:
-        file: tasks/lint_files.yml
+    # - name: Include tasks
+    #   ansible.builtin.include_tasks:
+    #     file: tasks/lint_files.yml
+
+    - name: Extract username and email from tower
+      ansible.builtin.debug:
+        msg: "The user is {{ tower_user_first_name }} with email {{ tower_user_email }}"
