@@ -22,23 +22,7 @@
         validate_certs: false
       register: team
     
-    # - name: Display Team output
-    #   ansible.builtin.debug:
-    #     var: team
-
-    # - name: Get id of a specific team
-    #   ansible.builtin.set_fact:
-    #     gitid: "{{ item_team.id }}"
-    #   loop: "{{ team.json }}"
-    #   loop_control:
-    #     loop_var: item_team
-    #   when: item_team.name == 'dev'
-
-    # - name: Display Team id
-    #   ansible.builtin.debug:
-    #     msg: "Team id is: '{{ gitid }}'"
-    
-    - name: Get Repo list
+    - name: Get Repo list for team {{ team_name }}
       ansible.builtin.uri:
         url: "https://api.github.com/orgs/ansible-automate/teams/{{ team_name }}/repos"  # ?per_page=100
         method: GET
@@ -49,18 +33,6 @@
         validate_certs: false
       register: output
     
-    # - name: Display Repo List
-    #   ansible.builtin.debug:
-    #     var: output
-
-    # - name: Set Repo List
-    #   ansible.builtin.set_fact:
-    #     repo_list: "{{ output.json | map(attribute='name') | list }}"
-
-    # - name: Display Repo List
-    #   ansible.builtin.debug:
-    #     var: repo_list
-
     - name: Set repo list variable
       ansible.builtin.set_fact:
         #rp_list: "{{ repo_list.split('\n') }}"
@@ -76,25 +48,4 @@
       ansible.builtin.include_tasks:
         file: tasks/branch.yml
       loop: "{{ output.json }}" 
-      when: rp_list is defined and item.name in rp_list  
-
-    # - name: Update branch URL
-    #   ansible.builtin.set_fact:
-    #     branches_url: "{{ item.branches_url | regex_replace('{/branch}$','') }}"
-    #   loop: "{{ output.json }}"
-    #   register: branchurl
-
-    # - name: Display branch url List
-    #   ansible.builtin.set_fact:
-    #     branch_urls: "{{ branch.ansible_facts.branches_url }}"
-    #   loop: "{{ branchurl.results }}"
-    #   loop_control:
-    #     loop_var: branch  
-
-    # - name: Convert variable to list using split filter
-    #   ansible.builtin.set_fact:
-    #     my_list: "{{ branches_url.split(',') }}"
-
-    # - name: Display updated branch URL
-    #   ansible.builtin.debug:
-    #     var: branch_urls
+      when: rp_list is defined and item.name in rp_list
