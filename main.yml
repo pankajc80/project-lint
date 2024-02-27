@@ -1,0 +1,50 @@
+- name: Playbook to execute ansible-lint and apply fixes as applicable
+  hosts: localhost
+  gather_facts: false
+  become: false
+  vars_files: 
+    - vars.yml
+
+  tasks:
+    - name: Remove all local repos
+      ansible.builtin.file:
+        path: "{{ repo_path }}"
+        state: absent
+      
+    - name: Get all the teams under an organisation
+      ansible.builtin.uri:
+        url: "https://api.github.com/orgs/ansible-automate/teams"
+        headers:
+          Accept: application/vnd.github+json
+          Authorization: Bearer {{ githubtoken }}
+          X-GitHub-Api-Version: 2022-11-28
+        validate_certs: false
+      register: team
+
+    - name: Looping through the teams
+      ansible.builtin.include_tasks:
+        file: git-repo.yml
+      loop: "{{ team.json }}"
+      loop_control:
+        loop_var: gitteam
+      when: team_name == "all"
+
+    # - name: Include playbook for all teams
+    #   ansible.builtin.shell:
+    #     cmd: ansible-playbook main.yml -e "gitteam='{{ item.name }}'" -e "src_branch={{ src_branch }}"
+    #   loop: "{{ team.json }}"
+    #   when: team_name == "all"
+
+    # - name: Include playbook for team {{ team_name }}
+    #   ansible.builtin.shell:
+    #     cmd: ansible-playbook main.yml -e "gitteam='{{ team_name }}'" -e "src_branch={{ src_branch }}"
+    #   #loop: "{{ team.json }}"
+    #   when: team_name != "all"
+
+    - name: Looping through team {{ team_name }}
+      ansible.builtin.include_tasks:
+        file: git-repo.yml
+      loop: "{{ team.json }}"
+      loop_control:
+        loop_var: gitteam
+      when: gitteam.name == team_name

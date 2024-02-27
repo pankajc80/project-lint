@@ -1,30 +1,30 @@
-- name: Automated ansible-lint fix
-  hosts: localhost
-  gather_facts: false
-  become: false
-  vars_files: 
-    - vars.yml
+# - name: Automated ansible-lint fix
+#   hosts: localhost
+#   gather_facts: false
+#   become: false
+#   vars_files: 
+#     - vars.yml
 
-  tasks:
-    - name: Remove all local repos
-      ansible.builtin.file:
-        path: "{{ repo_path }}"
-        state: absent
+#   tasks:
+#     - name: Remove all local repos
+#       ansible.builtin.file:
+#         path: "{{ repo_path }}"
+#         state: absent
 
-    - name: Get all the teams under an organisation
-      ansible.builtin.uri:
-        url: "https://api.github.com/orgs/ansible-automate/teams"
-        method: GET
-        headers:
-          Accept: application/vnd.github+json
-          Authorization: Bearer {{ githubtoken }}
-          X-GitHub-Api-Version: 2022-11-28
-        validate_certs: false
-      register: team
+#     - name: Get all the teams under an organisation
+#       ansible.builtin.uri:
+#         url: "https://api.github.com/orgs/ansible-automate/teams"
+#         method: GET
+#         headers:
+#           Accept: application/vnd.github+json
+#           Authorization: Bearer {{ githubtoken }}
+#           X-GitHub-Api-Version: 2022-11-28
+#         validate_certs: false
+#       register: team
     
-    - name: Get Repo list for team {{ team_name }}
+    - name: Get Repo list for team {{ gitteam.name }}
       ansible.builtin.uri:
-        url: "https://api.github.com/orgs/ansible-automate/teams/{{ team_name }}/repos"  # ?per_page=100
+        url: "https://api.github.com/orgs/ansible-automate/teams/{{ gitteam.name }}/repos"  # ?per_page=100
         method: GET
         headers:
           Accept: application/vnd.github+json
