@@ -21,29 +21,19 @@
         validate_certs: false
       register: team
 
+    # This task will loop through all the teams under an organization
     - name: Looping through the teams
       ansible.builtin.include_tasks:
-        file: git-repo.yml
+        file: tasks/git-repo.yml
       loop: "{{ team.json }}"
       loop_control:
         loop_var: gitteam
       when: team_name == "all"
 
-    # - name: Include playbook for all teams
-    #   ansible.builtin.shell:
-    #     cmd: ansible-playbook main.yml -e "gitteam='{{ item.name }}'" -e "src_branch={{ src_branch }}"
-    #   loop: "{{ team.json }}"
-    #   when: team_name == "all"
-
-    # - name: Include playbook for team {{ team_name }}
-    #   ansible.builtin.shell:
-    #     cmd: ansible-playbook main.yml -e "gitteam='{{ team_name }}'" -e "src_branch={{ src_branch }}"
-    #   #loop: "{{ team.json }}"
-    #   when: team_name != "all"
-
+    # This task will only  be called for the team name provided as part of survey or in var file
     - name: Looping through team {{ team_name }}
       ansible.builtin.include_tasks:
-        file: git-repo.yml
+        file: tasks/git-repo.yml
       loop: "{{ team.json }}"
       loop_control:
         loop_var: gitteam

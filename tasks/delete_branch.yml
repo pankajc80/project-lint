@@ -1,15 +1,15 @@
 ---
-- name: Clone the repo with prod_linted branch
+- name: Clone the repo with linted branch
   ansible.builtin.git:
     repo: "{{ url }}"
     dest: "{{ repo_path }}/{{ item.name }}"
-    version: prod_linted
+    version: linted
   
-- name: Delete branches prod_linted and prod_linted_noresult
+- name: Delete branches prod_linted and linted
   ansible.builtin.shell: |
     cd {{ repo_path }}/{{ item.name }}
+    git push {{ url }} -d linted
     git push {{ url }} -d prod_linted
-    git push {{ url }} -d prod_linted_noresult
  
 - name: Delete repo dir
   ansible.builtin.file:
