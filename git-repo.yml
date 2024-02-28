@@ -1,0 +1,51 @@
+# - name: Automated ansible-lint fix
+#   hosts: localhost
+#   gather_facts: false
+#   become: false
+#   vars_files: 
+#     - vars.yml
+
+#   tasks:
+#     - name: Remove all local repos
+#       ansible.builtin.file:
+#         path: "{{ repo_path }}"
+#         state: absent
+
+#     - name: Get all the teams under an organisation
+#       ansible.builtin.uri:
+#         url: "https://api.github.com/orgs/ansible-automate/teams"
+#         method: GET
+#         headers:
+#           Accept: application/vnd.github+json
+#           Authorization: Bearer {{ githubtoken }}
+#           X-GitHub-Api-Version: 2022-11-28
+#         validate_certs: false
+#       register: team
+    
+    - name: Get Repo list for team {{ gitteam.name }}
+      ansible.builtin.uri:
+        url: "https://api.github.com/orgs/ansible-automate/teams/{{ gitteam.name }}/repos"  # ?per_page=100
+        method: GET
+        headers:
+          Accept: application/vnd.github+json
+          Authorization: Bearer {{ githubtoken }}
+          X-GitHub-Api-Version: 2022-11-28
+        validate_certs: false
+      register: output
+    
+    - name: Set repo list variable
+      ansible.builtin.set_fact:
+        #rp_list: "{{ repo_list.split('\n') }}"
+        rp_list: "{{ repo_list }}"
+
+    - name: Loop through repos to get the branches
+      ansible.builtin.include_tasks:
+        file: tasks/branch.yml
+      loop: "{{ output.json }}" 
+      when: rp_list | length == 0
+
+    - name: Loop through speficied repos to get the branches
+      ansible.builtin.include_tasks:
+        file: tasks/branch.yml
+      loop: "{{ output.json }}" 
+      when: rp_list is defined and item.name in rp_list
