@@ -12,14 +12,14 @@
     git config user.name "Pankaj"
     rm -f linted/*.txt
   ignore_errors: true
-  when: src_branch == "prod_linted"
+  when: src_branch == "linted"
   
-- name: Checkout new branch named prod_linted
+- name: Checkout new branch named linted
   ansible.builtin.shell: |
     cd {{ repo_path }}/{{ item.name }}
     git config user.email "mrchandna@gmail.com"
     git config user.name "Pankaj"
-    git checkout -b prod_linted prod
+    git checkout -b linted prod
     mkdir linted
   #ignore_errors: true
   when: src_branch == "prod"
@@ -28,35 +28,35 @@
   ansible.builtin.include_tasks:
     file: tasks/lint_files.yml
   
-- name: Add and Commit linted files to prod_linted and checkout new branch without text files for prod branch
+- name: Add and Commit linted files to linted branch and checkout new branch without text files for prod branch
   ansible.builtin.shell: |
     cd {{ repo_path }}/{{ item.name }}
     git add .
     git commit -m "Updated modules with FQCN, reformatted yaml and generated lint report"
-    git push {{ url }} prod_linted
-    git checkout -b prod_linted_noresult prod_linted
+    git push {{ url }} linted
+    git checkout -b prod_linted linted
     rm -rf linted/
     git add .
     git commit -m "Updated modules with FQCN, reformatted yaml and generated lint report"
-    git push {{ url }} prod_linted_noresult
+    git push {{ url }} prod_linted
   #ignore_errors: true
   when: src_branch == "prod"
 
-- name: Add and Commit linted files to prod_linted and checkout new branch without text files for prod_linted branch
+- name: Add and Commit linted files to linted branch and checkout new branch without text files 
   ansible.builtin.shell: |
     cd {{ repo_path }}/{{ item.name }}
     git add .
     git commit -m "Updated modules with FQCN, reformatted yaml and generated lint report"
-    git push {{ url }} prod_linted
-    git checkout -b prod_linted_noresult prod_linted
+    git push {{ url }} linted
+    git checkout -b prod_linted linted
     rm -rf linted/
     git add .
     git commit -m "Updated modules with FQCN, reformatted yaml and generated lint report"
-    git push {{ url }} prod_linted_noresult
+    git push {{ url }} prod_linted
   ignore_errors: true
-  when: src_branch == "prod_linted"
+  when: src_branch == "linted"
 
-- name: Create Pull Request from prod_linted_noresult to prod
+- name: Create Pull Request from prod_linted to prod
   ansible.builtin.uri:
     url: https://api.github.com/repos/ansible-automate/{{ item.name }}/pulls
     headers:
@@ -65,8 +65,8 @@
       X-GitHub-Api-Version: 2022-11-28
     body_format: json
     body:
-      title: Marge linted to prod
-      head: prod_linted_noresult
+      title: Marge prod_linted to prod
+      head: prod_linted
       base: prod
     validate_certs: false
     method: POST

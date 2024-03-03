@@ -21,26 +21,18 @@
     validate_certs: false
   register: branch_list
 
-# - name: Set Branch list
-#   ansible.builtin.set_fact:
-#     branchlist: "{{ branch_list.json | map(attribute='name') | list }}"
-
-- name: Display branch list
-  ansible.builtin.debug:
-    var: branch_list
-
 - name: Delete Linted Branch
   ansible.builtin.include_tasks:
     file: tasks/delete_branch.yml
   loop: "{{ branch_list.json }}"
   loop_control:
     loop_var: item_branch
-  when: item_branch.name == 'prod_linted' and src_branch == 'prod'
+  when: item_branch.name == 'linted' and src_branch == 'prod'
 
 - name: Delete NoResult Branch
   ansible.builtin.include_tasks:
-    file: tasks/delete_noresult_branch.yml
-  when: src_branch == 'prod_linted'
+    file: tasks/delete_prod_linted.yml
+  when: src_branch == 'linted'
 
 - name: Loop through the branch to perform lint
   ansible.builtin.include_tasks:
