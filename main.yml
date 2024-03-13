@@ -30,6 +30,15 @@
         loop_var: gitteam
       when: team_name == "all"
 
+    # This task is to get the team id which is required in case of Enterprise GitHub to list the Repos
+    - name: Get Team id
+      ansible.builtin.set_fact:
+        team_id: "{{ item_team.id }}"
+      loop: "{{ team.json }}"
+      loop_control:
+        loop_var: item_team
+      when: item_team.name == team_name
+    
     # This task will only  be called for the team name provided as part of survey or in var file
     - name: Looping through team {{ team_name }}
       ansible.builtin.include_tasks:
