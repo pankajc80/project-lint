@@ -7,6 +7,6 @@
     #   ansible.builtin.include_tasks:
     #     file: tasks/lint_files.yml
 
-    - name: Extract username id and email from Controller
+    - name: Extract username and email from Controller
       ansible.builtin.debug:
-        msg: "The user is {{ awx_user_first_name }} with email {{ awx_user_email }} with user id {{ awx_user_id }}"
+        msg: "The user is {{ awx_user_name }} with email {{ awx_user_email }}"
