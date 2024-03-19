@@ -9,7 +9,7 @@
   ansible.builtin.shell: |
     cd {{ repo_path }}/{{ item.name }}
     git config user.email "mrchandna@gmail.com"
-    git config user.name "Pankaj"
+    git config user.name "{{ awx_user_id }}"
     rm -f linted/*.txt
   ignore_errors: true
   when: src_branch == "linted"
@@ -18,7 +18,7 @@
   ansible.builtin.shell: |
     cd {{ repo_path }}/{{ item.name }}
     git config user.email "mrchandna@gmail.com"
-    git config user.name "Pankaj"
+    git config user.name "{{ awx_user_id }}"
     git checkout -b linted prod
     mkdir linted
   #ignore_errors: true
