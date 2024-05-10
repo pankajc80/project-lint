@@ -14,9 +14,9 @@
 
 - name: Execute lint on discovered files
   ansible.builtin.shell: |
-    ansible-lint -q --nocolor -c ../../.ansible-lint {{ flist }} --exclude * --fix >> linted/{{ flist | basename | regex_replace('(.yaml|.yml)','') }}_report.txt 2>>linted/{{ flist | basename | regex_replace('(.yaml|.yml)','') }}_error.txt 
-  args: 
-    chdir: "{{ repo_path }}/{{ item.name }}"
+    ansible-lint -q --nocolor -c .ansible-lint {{ flist }} --exclude * --fix >> linted/{{ flist | basename | regex_replace('(.yaml|.yml)','') }}_report.txt 2>>linted/{{ flist | basename | regex_replace('(.yaml|.yml)','') }}_error.txt 
+  #args: 
+   # chdir: "{{ repo_path }}/{{ item.name }}"
   loop: "{{ file_list }}"
   loop_control:
     loop_var: flist
