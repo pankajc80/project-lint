@@ -5,55 +5,70 @@
     dest: "{{ repo_path }}/{{ item.name }}"
     version: "{{ src_branch }}"
   
-- name: Remove previous lint reports from branch {{ src_branch }}
-  ansible.builtin.shell: |
-    cd {{ repo_path }}/{{ item.name }}
-    git config user.email "mrchandna@gmail.com"
-    git config user.name "{{ awx_user_name }}"
-    rm -f linted/*.txt
-  ignore_errors: true
+- name: Remove linted directory from linted branch
+  ansible.builtin.include_tasks:
+    file: tasks/delete_directory.yml
   when: src_branch == "linted"
-  
+
 - name: Checkout new branch named linted
   ansible.builtin.shell: |
     cd {{ repo_path }}/{{ item.name }}
     git config user.email "mrchandna@gmail.com"
-    git config user.name "{{ awx_user_name }}"
+    git config user.name "Pankaj"
     git checkout -b linted prod
-    mkdir linted
   #ignore_errors: true
   when: src_branch == "prod"
 
 - name: Task to look for YAML files to perform lint
   ansible.builtin.include_tasks:
-    file: tasks/lint_files.yml
+    file: tasks/find_files.yml
   
-- name: Add and Commit linted files to linted branch and checkout new branch without text files for prod branch
+- name: Add Commit and Push linted files to linted branch and checkout new branch without text files
   ansible.builtin.shell: |
     cd {{ repo_path }}/{{ item.name }}
     git add .
     git commit -m "Updated modules with FQCN, reformatted yaml and generated lint report"
     git push {{ url }} linted
-    git checkout -b prod_linted linted
-    rm -rf linted/
-    git add .
-    git commit -m "Updated modules with FQCN, reformatted yaml and generated lint report"
-    git push {{ url }} prod_linted
+    git push {{ url }} --tags
+    git checkout -b prod_linted linted 
   #ignore_errors: true
   when: src_branch == "prod"
 
-- name: Add and Commit linted files to linted branch and checkout new branch without text files 
+- name: Add Commit and Push linted files to linted branch and checkout new branch without text files 
+  ansible.builtin.shell: |
+    cd {{ repo_path }}/{{ item.name }}
+    git config user.email "mrchandna@gmail.com"
+    git config user.name "Pankaj"
+    git add .
+    git commit -m "Updated modules with FQCN, reformatted yaml and generated lint report"
+    git push {{ url }} linted
+    git push {{ url }} --tags
+    git checkout -b prod_linted linted 
+  #ignore_errors: true
+  when: src_branch == "linted"
+
+- name: Remove text reports from prod_linted branch
+  ansible.builtin.include_tasks:
+    file: tasks/delete_directory.yml
+
+- name: Add and Commit linted files to prod_linted branch and push changes to remote repo
   ansible.builtin.shell: |
     cd {{ repo_path }}/{{ item.name }}
     git add .
     git commit -m "Updated modules with FQCN, reformatted yaml and generated lint report"
-    git push {{ url }} linted
-    git checkout -b prod_linted linted
-    rm -rf linted/
+    git push {{ url }} prod_linted
+    git push {{ url }} --tags
+  #ignore_errors: true
+  when: src_branch == "prod"
+
+- name: Add and Commit linted files to prod_linted branch and push changes to remote repo
+  ansible.builtin.shell: |
+    cd {{ repo_path }}/{{ item.name }}
     git add .
     git commit -m "Updated modules with FQCN, reformatted yaml and generated lint report"
     git push {{ url }} prod_linted
-  ignore_errors: true
+    git push {{ url }} --tags
+  #ignore_errors: true
   when: src_branch == "linted"
 
 - name: Create Pull Request from prod_linted to prod

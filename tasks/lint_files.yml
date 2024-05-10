@@ -1,22 +1,23 @@
 ---
-- name: Find YML files in repo {{ item.name }} for linting
-  ansible.builtin.find:
-    path: "{{ repo_path }}/{{ item.name }}"
-    patterns: '*.yml,*.yaml'
-    recurse: true 
-  register: files
-
-- name: Compute the file list
+- name: Get the file name from the file path
   ansible.builtin.set_fact:
-    #file_list: "{{ files['files'] | map(attribute='path') | map('regex_replace','^.*/(.*)$','\\1') | list }}"
-    file_list: "{{ files['files'] | map(attribute='path') | map('basename') | list }}"
+    fname: "{{ flist | basename }}"
+
+- name: Get the directory path 
+  ansible.builtin.set_fact:
+    dpath: "{{ flist | dirname }}"
+
+- name: Create linted directory
+  ansible.builtin.file:
+    path: "{{ dpath }}/linted"
+    state: directory
+    mode: '0755'
 
 - name: Execute lint on discovered files
   ansible.builtin.shell: |
-    ansible-lint -q --nocolor -c ../../.ansible-lint {{ flist }} --exclude * --fix >> linted/{{ flist | regex_replace('(.yaml|.yml)','') }}_report.txt 2>>linted/{{ flist | regex_replace('(.yaml|.yml)','') }}_error.txt 
-  args: 
-    chdir: "{{ repo_path }}/{{ item.name }}"
-  loop: "{{ file_list }}"
-  loop_control:
-    loop_var: flist
+    ansible-lint -q --nocolor -c .ansible-lint {{ flist }} --exclude * --fix >> {{ dpath }}/linted/{{ fname | regex_replace('(.yaml|.yml)','') }}_report.txt 2>>./{{ dpath }}/linted/{{ fname | regex_replace('(.yaml|.yml)','') }}_error.txt
+  #args: 
+   # chdir: "{{ repo_path }}/{{ item.name }}"
   ignore_errors: true
+  register: result
+  failed_when: result.rc > 2

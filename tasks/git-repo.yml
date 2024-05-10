@@ -1,5 +1,5 @@
----    
-    - name: Get Repo list for team {{ gitteam.name }}  # Include team id in place of team name in the url if testing with enterprise GitHub
+---
+    - name: Get Repo list for team {{ gitteam.name }}
       ansible.builtin.uri:
         url: "https://api.github.com/orgs/ansible-automate/teams/{{ gitteam.name }}/repos"  # ?per_page=100
         method: GET

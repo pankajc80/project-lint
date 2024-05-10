@@ -1,0 +1,16 @@
+---
+- name: Find linted directories
+  ansible.builtin.find:
+    paths: "{{ repo_path }}/{{ item.name }}"
+    patterns: "linted"
+    file_type: directory
+    recurse: yes
+  register: linted_directories
+
+- name: Delete linted directories
+  file:
+    path: "{{ directory.path }}"
+    state: absent
+  loop: "{{ linted_directories.files }}"
+  loop_control:
+    loop_var: directory
