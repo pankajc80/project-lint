@@ -21,3 +21,5 @@
   loop_control:
     loop_var: flist
   ignore_errors: true
+  register: result
+  failed_when: result.rc > 2
