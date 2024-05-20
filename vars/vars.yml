@@ -5,5 +5,5 @@ repo_path: ./repo_dir
 # The below needs to be provided only when running the playbook from the command line. Remove the "#" prompt
 # githubtoken:
 # team_name:
-# repo_list: 
+# repo_list:
 # src_branch:

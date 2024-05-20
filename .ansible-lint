@@ -1,7 +1,4 @@
 ---
-skip_list:
-  - schema[tasks]
-  - schema[meta]
-  - schema[vars]
-  - schema[playbook]
+#skip_list:
+ # - schema[meta]
 offline: true
