@@ -1,5 +1,6 @@
 ---
 gituser: pankajc80
+#awx_user_name:           # Needed only when running through command-line
 repo_path: ./repo_dir
 
 # The below needs to be provided only when running the playbook from the command line. Remove the "#" prompt
@@ -7,3 +8,5 @@ repo_path: ./repo_dir
 # team_name:
 # repo_list:
 # src_branch:
+# skip_list:
+  #- args[module]

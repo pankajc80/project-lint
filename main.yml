@@ -21,14 +21,23 @@
         validate_certs: false
       register: team
 
+    - name: Check if the specified team exists
+      ansible.builtin.set_fact:
+        team_exists: "{{ (team.json | map(attribute='name') | list) is search(team_name) }}"
+
+    - name: Stop if the team does not exist
+      ansible.builtin.fail:
+        msg: "Team '{{ team_name }}' does not exist"
+      when: not team_exists
+
     # This task will loop through all the teams under an organization
-    - name: Looping through the teams
-      ansible.builtin.include_tasks:
-        file: tasks/git-repo.yml
-      loop: "{{ team.json }}"
-      loop_control:
-        loop_var: gitteam
-      when: team_name == "all"
+    # - name: Looping through the teams
+    #   ansible.builtin.include_tasks:
+    #     file: tasks/git-repo.yml
+    #   loop: "{{ team.json }}"
+    #   loop_control:
+    #     loop_var: gitteam
+    #   when: team_name == "all"
 
     # This task is to get the team id which is required in case of Enterprise GitHub to list the Repos
     - name: Get Team id
@@ -37,7 +46,7 @@
       loop: "{{ team.json }}"
       loop_control:
         loop_var: item_team
-      when: item_team.name == team_name
+      when: team_exists and item_team.name == team_name
     
     # This task will only  be called for the team name provided as part of survey or in var file
     - name: Looping through team {{ team_name }}
@@ -46,4 +55,4 @@
       loop: "{{ team.json }}"
       loop_control:
         loop_var: gitteam
-      when: gitteam.name == team_name
+      when: team_exists and gitteam.name == team_name
